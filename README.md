@@ -1,2 +1,6 @@
 # DataMiningInPython
-Classification Clustering Association
+Classification
+
+Clustering
+
+Association
