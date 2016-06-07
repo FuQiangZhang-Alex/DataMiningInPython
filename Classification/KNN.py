@@ -18,18 +18,23 @@ def knn_classify(in_x, data_set, lbl, k):
     data_set_size = data_set.shape[0]
     diff_mat = np.tile(in_x, (data_set_size, 1)) - data_set  # difference of input data and all training data
     square_diff_mat = diff_mat ** 2
-    distance_mat = square_diff_mat ** 0.5
+    square_distances = square_diff_mat.sum(axis=1)
+    distance_mat = square_distances ** 0.5
     sorted_distance = distance_mat.argsort()
-    print(sorted_distance)
+    class_count = {}
+    for i in range(k):
+        vote_label = lbl[sorted_distance[i]]
+        class_count[str(vote_label)] = labels.get(str(vote_label), 'None')
+    return class_count
 
 
-def file2matrix():
+def file2matrix(file_name):
     class_vector = []
-    with open(file='data/Activity Recognition from Single Chest-Mounted Accelerometer/debug.csv') as training:
+    with open(file=file_name) as training:
         index = 0
         line_total = len(training.readlines())
         mat = np.zeros((line_total, 3))
-    with open(file='data/Activity Recognition from Single Chest-Mounted Accelerometer/debug.csv') as training:
+    with open(file=file_name) as training:
         for index, line in enumerate(training.readlines()):
             record = line.split(',')
             mat[index, :] = record[1:4]
@@ -57,10 +62,10 @@ def norm_data(data_set):
     norm_data_set = norm_data_set / np.tile(ranges, (m, 1))
     return norm_data_set, min_val, max_val
 
-matrix, class_array = file2matrix()
-normal_matrix, min_v, max_v = norm_data(matrix)
-inx = [1866, 2390, 2282]
-knn_classify(inx, matrix, None, None)
-# print(matrix)
-# print(min_v, max_v)
-# print(normal_matrix)
+matrix, class_array = file2matrix('data/Activity Recognition from Single Chest-Mounted Accelerometer/debug.csv')
+# normal_matrix, min_v, max_v = norm_data(matrix)
+# for data, class_name in zip(matrix, class_array):
+#    print(data, class_name, labels.get(str(class_name)))
+inx = np.array([2089, 2539, 2158])
+class_cnt = knn_classify(inx, matrix, class_array, 10)
+print(class_cnt)
