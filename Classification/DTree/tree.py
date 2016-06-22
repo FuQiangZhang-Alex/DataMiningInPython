@@ -17,14 +17,14 @@ def calculate_shannon_entropy(data_set):
     num_entries = len(data_set)
     label_counts = {}
     for feat_vec in data_set:
-        print(feat_vec)
         current_label = feat_vec[-1]
         if current_label not in label_counts:
-            label_counts[current_label] = 0
-        label_counts[current_label] += 1
+            label_counts[current_label] = 1
+        else:
+            label_counts[current_label] += 1
     shannon_entropy = 0.0
     for key in label_counts:
-        prob = float(label_counts[key]) / num_entries
+        prob = float(label_counts[key]) / num_entries  # calculate probability
         shannon_entropy -= prob * log(prob, 2)
     return shannon_entropy
 
@@ -46,5 +46,29 @@ def split_data_set(data_set, axis, value):
     return sub_set
 
 
+def choose_best_feature_to_split(data_set):
+    """
+    choose the best feature(the one with largest information gain, shannon entropy) to split on
+    :param data_set: data set to split
+    :return: best feature to split
+    """
+    number_features = len(data_set[0]) - 1
+    base_entropy = calculate_shannon_entropy(data_set)
+    best_information_gain, best_feature = 0.0, -1
+    for i in range(number_features):
+        feature_list = [example[i] for example in data_set]
+        unique_values = set(feature_list)
+        new_entropy = 0.0
+        for value in unique_values:
+            sub_data_set = split_data_set(data_set, i, value)
+            probability = len(sub_data_set) / float(len(data_set))
+            new_entropy += probability * calculate_shannon_entropy(sub_data_set)
+        information_gain = base_entropy - new_entropy
+        if information_gain > best_information_gain:
+            best_information_gain = information_gain
+            best_feature = i
+    return best_feature
+
+
 data = file2list(file='data/car.csv')
-print(calculate_shannon_entropy(data))
+print(choose_best_feature_to_split(data))
